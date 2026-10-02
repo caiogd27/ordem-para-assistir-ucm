@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Ordem para assistir ao MCU</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eceef5; --surface:#ffffff; --ink:#151a33; --muted:#585e80; --line:#d6d9e6;
+  --ess:#c8202f; --rec:#9a6a08; --opt:#686d8f; --accent:#2d3a8c; --ok:#1f7a4d;
+  --head:'Barlow Condensed','Arial Narrow','Helvetica Neue',Arial,sans-serif;
+  --body:'Barlow','Helvetica Neue',Arial,sans-serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1226; --surface:#171c38; --ink:#eceffa; --muted:#a1a8c9; --line:#2a3158;
+    --ess:#ff6b72; --rec:#f0b84a; --opt:#8c93b8; --accent:#8ea0ff; --ok:#5fd39a;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1226; --surface:#171c38; --ink:#eceffa; --muted:#a1a8c9; --line:#2a3158;
+  --ess:#ff6b72; --rec:#f0b84a; --opt:#8c93b8; --accent:#8ea0ff; --ok:#5fd39a;
+}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 150px)}
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.4;-webkit-text-size-adjust:100%}
+.wrap{max-width:720px;margin:0 auto;padding:0 14px 48px}
+header{padding:22px 2px 6px}
+.stones{display:flex;gap:7px;margin-bottom:12px}
+.stones i{width:12px;height:12px;border-radius:50%;display:block}
+h1{font-family:var(--head);font-weight:700;font-size:clamp(34px,9vw,52px);line-height:.98;margin:0 0 6px;letter-spacing:.2px}
+.sub{color:var(--muted);margin:0;max-width:52ch;font-size:15px}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding:10px 0 10px;margin-top:10px;border-bottom:1px solid var(--line)}
+.prog{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.track{flex:1;height:8px;background:var(--line);border-radius:99px;overflow:hidden}
+.fill{height:100%;width:0;background:var(--ess);border-radius:99px;transition:width .25s}
+.count{font-family:var(--head);font-weight:600;font-size:19px;white-space:nowrap}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font:600 14px var(--body);color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:99px;padding:7px 13px;min-height:38px;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.chip:focus-visible,.item:focus-within .box,.reset:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin:12px 2px 0;font-size:13.5px;color:var(--muted)}
+.legend b{font-weight:600}
+section{margin-top:26px}
+h2{font-family:var(--head);font-weight:700;font-size:27px;line-height:1.05;margin:0 2px 2px}
+.sdesc{margin:0 2px 10px;color:var(--muted);font-size:14.5px;max-width:58ch}
+.list{background:var(--surface);border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.item{display:flex;gap:12px;align-items:flex-start;padding:12px 13px;border-top:1px solid var(--line);cursor:pointer}
+.item:first-child{border-top:0}
+.item input{position:absolute;opacity:0;pointer-events:none}
+.box{flex:none;width:26px;height:26px;border-radius:7px;border:2px solid var(--opt);display:grid;place-items:center;margin-top:1px;background:transparent}
+.item[data-l="e"] .box{border-color:var(--ess)}
+.item[data-l="r"] .box{border-color:var(--rec)}
+.box svg{width:16px;height:16px;stroke:#fff;fill:none;stroke-width:3.2;stroke-linecap:round;stroke-linejoin:round;opacity:0}
+.item input:checked + .box{background:var(--ok);border-color:var(--ok)}
+.item input:checked + .box svg{opacity:1}
+.txt{min-width:0;flex:1}
+.ttl{font-family:var(--head);font-weight:700;font-size:20.5px;line-height:1.1}
+.item input:checked ~ .txt .ttl{opacity:.55;text-decoration:line-through;text-decoration-thickness:1.5px}
+.meta{display:flex;gap:8px;align-items:center;margin-top:3px;font-size:13px;color:var(--muted)}
+.pill{font-weight:600;font-size:12.5px;padding:1px 8px;border-radius:99px;border:1.5px solid currentColor}
+.pill.e{color:var(--ess)} .pill.r{color:var(--rec)} .pill.o{color:var(--opt)}
+.note{margin:4px 0 0;font-size:14.5px;color:var(--ink);opacity:.86}
+.num{flex:none;width:26px;text-align:right;font-family:var(--head);font-weight:600;font-size:15px;color:var(--muted);padding-top:3px}
+.next{margin-top:28px;border:2px solid var(--ess);border-radius:12px;padding:14px 16px}
+.next b{font-family:var(--head);font-size:24px;display:block;line-height:1.1}
+.next span{color:var(--muted);font-size:14.5px}
+.reset{margin:22px 0 0;background:none;border:0;color:var(--muted);font:500 14px var(--body);text-decoration:underline;cursor:pointer;padding:8px 2px}
+.empty{padding:16px;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.fill{transition:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="stones" aria-hidden="true">
+    <i style="background:#f2b01e"></i><i style="background:#e0323c"></i><i style="background:#3b7bff"></i>
+    <i style="background:#8a4bd8"></i><i style="background:#2fb36b"></i><i style="background:#f07a1a"></i>
+  </div>
+  <h1>Ordem para assistir ao MCU</h1>
+  <p class="sub">Filmes, séries e curtas na ordem certa, com o que é necessário e o que dá para pular. Toque num título para marcar como visto.</p>
+</header>
+
+<div class="bar">
+  <div class="prog"><div class="track"><div class="fill" id="fill"></div></div><div class="count" id="count">0 de 0</div></div>
+  <div class="chips" role="group" aria-label="Filtro">
+    <button class="chip" data-f="all" aria-pressed="true">Tudo</button>
+    <button class="chip" data-f="e" aria-pressed="false">Só essencial</button>
+    <button class="chip" data-f="er" aria-pressed="false">Essencial e recomendado</button>
+  </div>
+</div>
+
+<div class="legend">
+  <span><b style="color:var(--ess)">Essencial:</b> muda a história principal</span>
+  <span><b style="color:var(--rec)">Recomendado:</b> dá contexto e retorno</span>
+  <span><b style="color:var(--opt)">Opcional:</b> solto, pode pular</span>
+</div>
+
+<main id="app"></main>
+
+<div class="next"><b>Próximo: Vingadores: Doomsday</b><span>Estreia em 18 de dezembro de 2026.</span></div>
+<button class="reset" id="reset" type="button">Desmarcar tudo</button>
+</div>
+
+<script>
+// l: e = essencial, r = recomendado, o = opcional
+var DATA = [
+ {t:"Saga do Infinito", d:"Ordem cronológica, com cada curta no ponto em que acontece.", items:[
+  ["Capitão América: O Primeiro Vingador","Filme","e","Começa em 1943: Tesseract e Peggy.",1],
+  ["Agent Carter (curta)","Curta","o","Só se quiser mais da Peggy."],
+  ["Homem de Ferro","Filme","e","",1],
+  ["O Incrível Hulk","Filme","e","Fácil de pular, mas Admirável Mundo Novo depende dele."],
+  ["The Consultant (curta)","Curta","o","Liga O Incrível Hulk a Os Vingadores."],
+  ["Homem de Ferro 2","Filme","e","",1],
+  ["Thor","Filme","e","",1],
+  ["A Funny Thing Happened on the Way to Thor's Hammer (curta)","Curta","o","Curta com o Coulson, logo depois de Thor."],
+  ["Os Vingadores","Filme","e","",1],
+  ["Item 47 (curta)","Curta","o","Acontece depois da Batalha de Nova York; sem impacto."],
+  ["Homem de Ferro 3","Filme","e","",1],
+  ["All Hail the King (curta)","Curta","o","Continua a história do Trevor Slattery."],
+  ["Thor: O Mundo Sombrio","Filme","e","Traz a Pedra da Realidade; o mais fraco da saga.",1],
+  ["Capitão América: O Soldado Invernal","Filme","e","",1],
+  ["Guardiões da Galáxia","Filme","e","Apresenta o lado espacial e a Pedra do Poder."],
+  ["Guardiões da Galáxia Vol. 2","Filme","e","Importante para Nebula, Gamora e o Vol. 3."],
+  ["Vingadores: Era de Ultron","Filme","e","Visão e Feiticeira Escarlate."],
+  ["Homem-Formiga","Filme","e","Apresenta o Reino Quântico."],
+  ["Capitão América: Guerra Civil","Filme","e","Entram Pantera Negra e Homem-Aranha."],
+  ["Doutor Estranho","Filme","e","Magia, Joia do Tempo e o Santuário."],
+  ["Homem-Aranha: De Volta ao Lar","Filme","e","O Homem-Aranha na linha principal."],
+  ["Thor: Ragnarok","Filme","e","Vem antes de Pantera Negra, pelo lançamento. Hulk e Valquíria."],
+  ["Pantera Negra","Filme","e","Wakanda e T'Challa."],
+  ["Vingadores: Guerra Infinita","Filme","e","Thanos e o estalo."],
+  ["Homem-Formiga e a Vespa","Filme","e","Faltava na lista do ChatGPT. Veja depois de Guerra Infinita: a cena final acontece durante o estalo."],
+  ["Capitã Marvel","Filme","e","Fica logo antes de Ultimato, como você pediu."],
+  ["Vingadores: Ultimato","Filme","e","O fim da saga."]
+ ]},
+ {t:"Depois de Ultimato", d:"Ordem de lançamento: evita spoilers e respeita as ligações entre as obras.", items:[
+  ["Homem-Aranha: Longe de Casa","Filme","e","Epílogo direto de Ultimato; prepara Sem Volta para Casa."],
+  ["WandaVision","Série","e","Obrigatória para Doutor Estranho 2, As Marvels e Agatha."],
+  ["Falcão e o Soldado Invernal","Série","e","Sam vira Capitão América; base de Admirável Mundo Novo e Thunderbolts*."],
+  ["Loki, Temporada 1","Série","e","Origem do multiverso e de Kang; Deadpool & Wolverine usa a AVT."],
+  ["Viúva Negra","Filme","e","Veja só depois de Ultimato: a cena pós-créditos entrega o fim da Natasha. Necessário para Gavião Arqueiro e Thunderbolts*."],
+  ["What If...? Temporada 1","Série","o","Animação fora da linha principal."],
+  ["Shang-Chi e a Lenda dos Dez Anéis","Filme","r","Dez Anéis; Wong e Abominável aparecem."],
+  ["Eternos","Filme","o","Pode pular; pouco ligado ao resto."],
+  ["Gavião Arqueiro","Série","r","Kate Bishop e Kingpin; liga com Echo."],
+  ["Homem-Aranha: Sem Volta para Casa","Filme","e","Abre o multiverso de vez."],
+  ["Cavaleiro da Lua","Série","o","História solta."],
+  ["Doutor Estranho no Multiverso da Loucura","Filme","e","Precisa de WandaVision."],
+  ["Ms. Marvel","Série","r","Kamala é central em As Marvels."],
+  ["Thor: Amor e Trovão","Filme","r","Segue Thor e a Jane; sem peso no resto."],
+  ["She-Hulk: Defensora de Heróis","Série","o","Faltava na lista do ChatGPT. Comédia solta, com participação do Demolidor."],
+  ["Lobisomem na Noite","Especial","o","Especial de Halloween solto."],
+  ["Pantera Negra: Wakanda para Sempre","Filme","e","Namor, Talokan e Riri Williams. Vem depois de Ms. Marvel e Thor 4, pelo lançamento."],
+  ["Guardiões da Galáxia: Especial de Festas","Especial","o","Se quiser, veja logo antes do Vol. 3."],
+  ["Homem-Formiga e a Vespa: Quantumania","Filme","e","Kang entra aqui."],
+  ["Guardiões da Galáxia Vol. 3","Filme","r","Fecha a trilogia; sem peso na trama principal."],
+  ["Invasão Secreta","Série","o","Skrulls e Fury; a maioria pula."],
+  ["Loki, Temporada 2","Série","r","Fecha o arco do Loki e do Kang."],
+  ["As Marvels","Filme","r","Exige Capitã Marvel, WandaVision e Ms. Marvel."],
+  ["Echo","Série","o","Só importa para Demolidor: Renascido."],
+  ["Deadpool & Wolverine","Filme","r","Precisa de Loki T1; Deadpool 1 e 2 e Logan ajudam (bloco à parte)."],
+  ["Agatha Desde Sempre","Série","o","Continuação leve de WandaVision."],
+  ["Capitão América: Admirável Mundo Novo","Filme","r","Pede O Incrível Hulk e Falcão e o Soldado Invernal."],
+  ["Demolidor: Renascido, Temporada 1","Série","r","Melhor com a série da Netflix antes (bloco à parte)."],
+  ["Thunderbolts*","Filme","e","A cena final prepara os Vingadores de Doomsday."],
+  ["Ironheart","Série","o","Riri Williams; ligada a Wakanda para Sempre."],
+  ["Quarteto Fantástico: Primeiros Passos","Filme","e","Outro universo; a cena final liga com Doomsday."],
+  ["Wonder Man","Série","o","Série leve sobre Hollywood; Trevor Slattery volta."],
+  ["Demolidor: Renascido, Temporada 2","Série","r","Traz Jessica Jones e liga com Homem-Aranha: Brand New Day."],
+  ["The Punisher: One Last Kill","Especial","r","Especial do Justiceiro, entre Demolidor T2 e Brand New Day."],
+  ["Homem-Aranha: Brand New Day","Filme","e","Estreou em 31 de julho de 2026."]
+ ]},
+ {t:"Bloco à parte: heróis urbanos (Netflix)", d:"Veja antes de Demolidor: Renascido. Ordem de estreia (a lista do ChatGPT colocava Jessica Jones T2 fora do lugar).", items:[
+  ["Demolidor, Temporada 1","Série","r","Base de Demolidor: Renascido."],
+  ["Jessica Jones, Temporada 1","Série","r","Ela volta em Demolidor: Renascido T2."],
+  ["Demolidor, Temporada 2","Série","r","Entram o Justiceiro e a Elektra."],
+  ["Luke Cage, Temporada 1","Série","o",""],
+  ["Punho de Ferro, Temporada 1","Série","o",""],
+  ["Os Defensores","Série","o","Junta os quatro heróis; pode pular."],
+  ["O Justiceiro, Temporada 1","Série","r","Frank Castle; importa para o especial."],
+  ["Jessica Jones, Temporada 2","Série","o",""],
+  ["Luke Cage, Temporada 2","Série","o",""],
+  ["Punho de Ferro, Temporada 2","Série","o",""],
+  ["Demolidor, Temporada 3","Série","r","O melhor da série e a base do Fisk em Renascido."],
+  ["O Justiceiro, Temporada 2","Série","o",""],
+  ["Jessica Jones, Temporada 3","Série","o",""]
+ ]},
+ {t:"Bloco à parte: outras realidades", d:"Nenhum é obrigatório. Ordem de lançamento.", items:[
+  ["Homem-Aranha (2002)","Filme","o","Dá peso a Sem Volta para Casa."],
+  ["Homem-Aranha 2","Filme","o",""],
+  ["Homem-Aranha 3","Filme","o",""],
+  ["O Espetacular Homem-Aranha","Filme","o",""],
+  ["O Espetacular Homem-Aranha 2","Filme","o",""],
+  ["X-Men","Filme","o","A franquia da Fox; pule se quiser."],
+  ["X-Men 2","Filme","o",""],
+  ["X-Men: O Confronto Final","Filme","o",""],
+  ["X-Men: Primeira Classe","Filme","o",""],
+  ["X-Men: Dias de um Futuro Esquecido","Filme","o",""],
+  ["X-Men: Apocalipse","Filme","o",""],
+  ["X-Men: Fênix Negra","Filme","o",""],
+  ["Deadpool","Filme","r","Ajuda em Deadpool & Wolverine."],
+  ["Deadpool 2","Filme","r","Ajuda em Deadpool & Wolverine."],
+  ["Logan","Filme","r","O Wolverine de Deadpool & Wolverine nasce daqui."],
+  ["X-Men '97","Série","r","Animação muito elogiada, num universo à parte."],
+  ["Your Friendly Neighborhood Spider-Man","Série","o","Animação em universo próprio."],
+  ["Marvel Zombies","Série","o","Animação em universo próprio."],
+  ["Eyes of Wakanda","Série","o","Animação sobre a Wakanda antiga; não precisa ser a primeira."],
+  ["I Am Groot (curtas)","Curta","o","Curtas leves; pode pular."],
+  ["Agents of S.H.I.E.L.D. e Agent Carter (séries)","Série","o","Sem ligação com os filmes novos; só por curiosidade."]
+ ]}
+];
+
+var KEY = "mcu-vistos-v1";
+var PRE = []; // ids pré-marcados (itens com 5º campo = 1)
+var app = document.getElementById("app");
+var filter = "all";
+var n = 0, items = [];
+
+DATA.forEach(function(sec){
+  sec.rows = sec.items.map(function(r){
+    n++;
+    var it = {id:n, title:r[0], kind:r[1], l:r[2], note:r[3]||"", pre:!!r[4]};
+    if (it.pre) PRE.push(n);
+    items.push(it);
+    return it;
+  });
+});
+
+function load(){
+  try{
+    var raw = localStorage.getItem(KEY);
+    if (raw) return JSON.parse(raw);
+  }catch(e){}
+  return PRE.slice();
+}
+function save(arr){ try{ localStorage.setItem(KEY, JSON.stringify(arr)); }catch(e){} }
+var seen = new Set(load());
+
+var LBL = {e:"Essencial", r:"Recomendado", o:"Opcional"};
+var CHECK = '<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg>';
+
+function esc(s){ return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+
+function build(){
+  var html = "";
+  DATA.forEach(function(sec, si){
+    html += '<section data-s="'+si+'"><h2>'+esc(sec.t)+'</h2><p class="sdesc">'+esc(sec.d)+'</p><div class="list">';
+    sec.rows.forEach(function(it){
+      html += '<label class="item" data-id="'+it.id+'" data-l="'+it.l+'">'
+        + '<span class="num">'+it.id+'</span>'
+        + '<input type="checkbox" '+(seen.has(it.id)?'checked':'')+'>'
+        + '<span class="box">'+CHECK+'</span>'
+        + '<span class="txt"><span class="ttl">'+esc(it.title)+'</span>'
+        + '<span class="meta"><span>'+it.kind+'</span><span class="pill '+it.l+'">'+LBL[it.l]+'</span></span>'
+        + (it.note ? '<p class="note">'+esc(it.note)+'</p>' : '')
+        + '</span></label>';
+    });
+    html += '<div class="empty" hidden>Nada neste filtro.</div></div></section>';
+  });
+  app.innerHTML = html;
+}
+
+function visible(l){
+  return filter==="all" || (filter==="e" && l==="e") || (filter==="er" && l!=="o");
+}
+
+function refresh(){
+  var tot=0, done=0;
+  app.querySelectorAll("section").forEach(function(s){
+    var any=false;
+    s.querySelectorAll(".item").forEach(function(el){
+      var show = visible(el.dataset.l);
+      el.hidden = !show;
+      if (show){
+        any=true; tot++;
+        if (seen.has(+el.dataset.id)) done++;
+      }
+    });
+    s.hidden = !any;
+  });
+  document.getElementById("count").textContent = done+" de "+tot;
+  document.getElementById("fill").style.width = (tot? Math.round(done/tot*100):0)+"%";
+}
+
+app.addEventListener("change", function(ev){
+  var el = ev.target.closest(".item"); if(!el) return;
+  var id = +el.dataset.id;
+  if (ev.target.checked) seen.add(id); else seen.delete(id);
+  save(Array.from(seen));
+  refresh();
+});
+
+document.querySelectorAll(".chip").forEach(function(b){
+  b.addEventListener("click", function(){
+    filter = b.dataset.f;
+    document.querySelectorAll(".chip").forEach(function(c){ c.setAttribute("aria-pressed", c===b ? "true":"false"); });
+    refresh();
+  });
+});
+
+document.getElementById("reset").addEventListener("click", function(){
+  seen = new Set(); save([]);
+  app.querySelectorAll("input").forEach(function(i){ i.checked=false; });
+  refresh();
+});
+
+build(); refresh();
+</script>
+</body>
+</html>
